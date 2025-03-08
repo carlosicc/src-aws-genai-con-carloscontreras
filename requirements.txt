@@ -1,2 +1,29 @@
 aws-cdk-lib==2.150.0
 constructs>=10.0.0,<11.0.0
+streamlit==1.39.0,<2.0.0
+boto3>=1.36.16,<1.37.0
+bs4==0.0.2
+pandas==2.2.3
+
+# Enable for Advanced KB filtering
+pydantic==2.10.3
+
+# Enable for LangChain
+faiss-cpu==1.9.0.post1
+langchain==0.3.11
+langchain-community==0.3.11
+langchain-aws==0.2.9
+pypdf==5.1.0
+
+# PDF Extractor, using AWS:
+amazon-textract-textractor==1.8.5
+pdf2image==1.17.0 # For MacOS, this needs poppler; e.g. $ brew install poppler
+
+# Enable for Function Calling notebooks
+awswrangler==3.10.1
+termcolor==2.5.0
+
+# requirements for Notebooks 8x for Function Calling:
+loguru==0.7.3
+yfinance==0.2.54
+currencyconverter==0.18.1

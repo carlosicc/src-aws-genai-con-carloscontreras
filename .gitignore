@@ -4,7 +4,11 @@ __pycache__
 .pytest_cache
 .venv
 *.egg-info
+.DS_Store
 
 # CDK asset staging directory
 .cdk.staging
 cdk.out
+
+# Local models. Enable, if too heavy to package
+# build_local_llm

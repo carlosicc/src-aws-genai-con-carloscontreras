@@ -1,0 +1,6 @@
+{
+    "Categoría": ["Bebida", "Bebida", "Plato Principal", "Plato Principal", "Postre", "Postre"],
+    "Alimento": ["Agua", "Refresco", "Pizza", "Hamburguesa", "Helado", "Pastel"],
+    "Precio ($)": [1.50, 2.50, 12.99, 9.99, 4.50, 5.00],
+    "Calorías": [0, 150, 850, 700, 300, 450]
+}

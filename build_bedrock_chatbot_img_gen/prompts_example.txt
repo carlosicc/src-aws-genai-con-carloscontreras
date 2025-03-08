@@ -1,0 +1,7 @@
+Source: https://aws.amazon.com/blogs/aws/stability-ais-best-image-generating-models-now-in-amazon-bedrock/
+Lab: https://catalog.workshops.aws/building-with-amazon-bedrock/en-US/image-labs
+
+photo, realistic, a woman sitting in a field watching a kite fly in the sky, stormy sky, highly detailed, concept art, intricate, professional composition.
+
+professional 3d render of a white and orange sneaker, floating in center, hovering, floating, high quality, photorealistic.
+
