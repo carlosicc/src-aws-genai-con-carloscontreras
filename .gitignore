@@ -12,3 +12,6 @@ cdk.out
 
 # Local models. Enable, if too heavy to package
 # build_local_llm
+
+# Local testing
+_staging_local_testing

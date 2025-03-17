@@ -80,34 +80,43 @@ def stream_conversation(bedrock_client, question, system_prompt, input_model_id,
                 print('#'*100)
 
                 if 'usage' in metadata:
-                    
                     print("\nToken usage")
                     print(f"Input tokens: {metadata['usage']['inputTokens']}")
                     print(f"Output tokens: {metadata['usage']['outputTokens']}")
 
                     # Fetch pricing info
                     pricing_dir = os.path.dirname(os.path.abspath(__file__))
-
-                    # Construct the full path to the pricing list file
                     pricing_list = os.path.join(pricing_dir, 'bedrock_pricing.json')
+                    
                     with open(pricing_list,'r', encoding='utf-8') as f:
                         pricing_file = json.load(f)
 
-                    # Estimate cost of call
-                    print(f"Model: {input_model_id}, at temperature {input_temperature} and Top-K of {input_top_k}")
-                    print("""
-                          \nImportant: confirm pricing is up-to-date at https://aws.amazon.com/bedrock/pricing/)
-                            and update bedrock_pricing.json accordingly.
-                          """)
-                    print(f"Price per 1,000 input tokens: {pricing_file[input_model_id]['input']*1000:.5f}")
-                    print(f"Price per 1,000 output tokens: {pricing_file[input_model_id]['output']*1000:.5f}")
-                    cost_input_tokens = float(metadata['usage']['inputTokens']) * pricing_file[input_model_id]['input']
-                    cost_output_tokens = float(metadata['usage']['outputTokens']) * pricing_file[input_model_id]['output']
-                    total_cost = round(cost_input_tokens + cost_output_tokens,16)
+                    # Find matching model in pricing file
+                    matching_model = None
+                    for price_model_id in pricing_file.keys():
+                        if input_model_id.startswith(price_model_id):
+                            matching_model = price_model_id
+                            break
 
-                    # Print estimated cost
-                    print(f"\nTotal tokens in session: {metadata['usage']['totalTokens']}. Estimated cost: ${total_cost:.10f}")
-                    
+                    if matching_model:
+                        # Estimate cost of call
+                        print(f"Model: {input_model_id}, at temperature {input_temperature} and Top-K of {input_top_k}")
+                        print("""
+                              \nImportant: confirm pricing is up-to-date at https://aws.amazon.com/bedrock/pricing/)
+                                and update bedrock_pricing.json accordingly.
+                              """)
+                        print(f"Price per 1,000 input tokens: {pricing_file[matching_model]['input']*1000:.5f}")
+                        print(f"Price per 1,000 output tokens: {pricing_file[matching_model]['output']*1000:.5f}")
+                        cost_input_tokens = float(metadata['usage']['inputTokens']) * pricing_file[matching_model]['input']
+                        cost_output_tokens = float(metadata['usage']['outputTokens']) * pricing_file[matching_model]['output']
+                        total_cost = round(cost_input_tokens + cost_output_tokens,16)
+
+                        # Print estimated cost
+                        print(f"\nTotal tokens in session: {metadata['usage']['totalTokens']}. Estimated cost: ${total_cost:.10f}")
+                    else:
+                        print(f"\nWarning: Model '{input_model_id}' is not included in the pricing file. Please update bedrock_pricing.json with current pricing information.")
+                        print(f"Total tokens in session: {metadata['usage']['totalTokens']}. Cost estimation not available.")
+
                 if 'metrics' in event['metadata']:
                     print(
                         f"\nLatency: {metadata['metrics']['latencyMs']} milliseconds\n")
