@@ -1,58 +1,49 @@
+# Curso de Generative AI en AWS
 
-# Welcome to your CDK Python project!
+Este repositorio contiene el material de Carlos Contreras, con conceptos básicos y avanzados sobre Generative AI en AWS. El proyecto inluye notebooks, aplicaciones de ejemplo y recursos necesarios para aprender a construir aplicaciones de IA Generativa usando servicios de AWS.
 
-This is a blank project for CDK development with Python.
+## 🎯 Descripción
 
-The `cdk.json` file tells the CDK Toolkit how to execute your app.
+El contenido está diseñado para proporcionar una comprensión práctica de cómo desarrollar aplicaciones de IA Generativa en AWS, cubriendo desde conceptos básicos hasta implementaciones avanzadas. Se centra en el uso de Amazon Bedrock y su integración con otros servicios AWS.
 
-This project is set up like a standard Python project.  The initialization
-process also creates a virtualenv within this project, stored under the `.venv`
-directory.  To create the virtualenv it assumes that there is a `python3`
-(or `python` for Windows) executable in your path with access to the `venv`
-package. If for any reason the automatic creation of the virtualenv fails,
-you can create the virtualenv manually.
-
-To manually create a virtualenv on MacOS and Linux:
-
+## 🛠️ Estructura del Repositorio
 ```
-$ python3 -m venv .venv
+├── build_bedrock_chatbot_img_gen/    # Aplicación de generación de imágenes
+├── build_bedrock_chatbot_streamlit/  # Chatbot con Streamlit
+├── build_bedrock_langchain/          # Ejemplos de integración con LangChain
+├── build_bedrock_other_examples/     # Ejemplos adicionales
+├── build_streamlit_simple_webapp/    # Ejemplos básicos de Streamlit
+├── notebooks/                        # Jupyter notebooks con ejercicios y demos
 ```
 
-After the init process completes and the virtualenv is created, you can use the following
-step to activate your virtualenv.
+## 📋 Requisitos Previos
+- Cuenta AWS con acceso a Amazon Bedrock
+- Acceso a cuenta AWS con permisos administrativos
+- Python 3.12+
+- AWS CLI configurado
+- Visual Studio Code (recomendado)
+- Git
 
-```
-$ source .venv/bin/activate
-```
+## 🚀 Inicio Rápido
 
-If you are a Windows platform, you would activate the virtualenv like this:
-
-```
-% .venv\Scripts\activate.bat
-```
-
-Once the virtualenv is activated, you can install the required dependencies.
-
-```
-$ pip install -r requirements.txt
+1. Clone el repositorio:
+```bash
+git clone [URL_DEL_REPOSITORIO]
 ```
 
-At this point you can now synthesize the CloudFormation template for this code.
-
+2. Cree un entorno virtual:
 ```
-$ cdk synth
+python -m venv venv
+source venv/bin/activate  # En Windows: venv\Scripts\activate
 ```
 
-To add additional dependencies, for example other CDK libraries, just add
-them to your `setup.py` file and rerun the `pip install -r requirements.txt`
-command.
+3. Instale las dependencias:
+```
+python -m pip install -r requirements.txt
+```
 
-## Useful commands
+> Nota: Para entornos windows, es posible que el ejecutable (sinónimo) de Python sea "py"
 
- * `cdk ls`          list all stacks in the app
- * `cdk synth`       emits the synthesized CloudFormation template
- * `cdk deploy`      deploy this stack to your default AWS account/region
- * `cdk diff`        compare deployed stack with current state
- * `cdk docs`        open CDK documentation
+⚠️ Importante
+Revise los costes asociados con el uso de los modelos en Amazon Bedrock y asegúrese de limpiar los recursos después de las prácticas.
 
-Enjoy!
