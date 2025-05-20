@@ -6,7 +6,7 @@ import base64
 from io import BytesIO
 
 # SDK Init
-session = boto3.Session(profile_name="isen-4112") 
+session = boto3.Session() 
 bedrock = session.client(
     service_name='bedrock-runtime',
     region_name="us-west-2"
