@@ -14,7 +14,9 @@ col1, col2 = st.columns(2)
 
 # Everything in this with block will be placed in column 1
 with col1: 
-    st.subheader("Prompt") 
+    st.subheader("Prompt text:")
+    st.markdown("Opcional: Recuerda cambia la región AWS del modelo en el archivo image_lib.py, si es necesario! Confirma su disponibilidad en la documentación [enlace aquí](https://docs.aws.amazon.com/bedrock/latest/userguide/models-supported.html).")
+    st.markdown("---")
     
     # Display a multiline text box and Run Button
     prompt_text = st.text_area("Prompt text", height=200, label_visibility="collapsed") 
