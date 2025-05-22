@@ -2,6 +2,9 @@
 
 Este repositorio contiene el material de Carlos Contreras, con conceptos básicos y avanzados sobre Generative AI en AWS. El proyecto inluye notebooks, aplicaciones de ejemplo y recursos necesarios para aprender a construir aplicaciones de IA Generativa usando servicios de AWS.
 
+Este contenido forma parte del curso de Generative Con Carlos Contreras. 
+- Por ejemplo: [IA Generativa en AWS: De Cero a Experto con Amazon Bedrock](https://www.udemy.com/course/ia-generativa-en-aws)
+
 ## 🎯 Descripción
 
 El contenido está diseñado para proporcionar una comprensión práctica de cómo desarrollar aplicaciones de IA Generativa en AWS, cubriendo desde conceptos básicos hasta implementaciones avanzadas. Se centra en el uso de Amazon Bedrock y su integración con otros servicios AWS.
