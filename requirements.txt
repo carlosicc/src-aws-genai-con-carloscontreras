@@ -27,3 +27,7 @@ termcolor==2.5.0
 loguru==0.7.3
 yfinance==0.2.54
 currencyconverter==0.18.1
+
+# MCP (mcp tal vez avance muy rápido, así que sugiero usar la última versión estable y segura/recomendada)
+mcp==1.12.4
+aiosqlite==0.21.0

@@ -15,3 +15,4 @@ cdk.out
 
 # Local testing
 _staging_local_testing
+build_bedrock_mcp/demo.db
