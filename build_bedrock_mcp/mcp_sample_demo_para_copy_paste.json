@@ -1,0 +1,41 @@
+{
+  "mcpServers": {
+    "sqlite-demo": {
+      "disabled": true,
+      "timeout": 60,
+      "type": "stdio",
+      "command": "tus_directorios_aqui/src-aws-genai-con-carloscontreras/.venv/bin/python",
+      "args": [
+        "-u",
+        "tus_directorios_aqui/src-aws-genai-con-carloscontreras/build_bedrock_mcp/sqlite_mcp_server.py"
+      ]
+    },
+    "awslabs.aws-documentation-mcp-server": {
+      "autoApprove": [],
+      "disabled": false,
+      "timeout": 60,
+      "type": "stdio",
+      "command": "uvx",
+      "args": [
+        "awslabs.aws-documentation-mcp-server@latest"
+      ],
+      "env": {
+        "FASTMCP_LOG_LEVEL": "ERROR",
+        "AWS_DOCUMENTATION_PARTITION": "aws"
+      }
+    },
+    "awslabs.cdk-mcp-server": {
+      "autoApprove": [],
+      "disabled": false,
+      "timeout": 60,
+      "type": "stdio",
+      "command": "uvx",
+      "args": [
+        "awslabs.cdk-mcp-server@latest"
+      ],
+      "env": {
+        "FASTMCP_LOG_LEVEL": "ERROR"
+      }
+    }
+  }
+}
