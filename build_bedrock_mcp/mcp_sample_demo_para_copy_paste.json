@@ -1,9 +1,6 @@
 {
   "mcpServers": {
     "sqlite-demo": {
-      "disabled": true,
-      "timeout": 60,
-      "type": "stdio",
       "command": "tus_directorios_aqui/src-aws-genai-con-carloscontreras/.venv/bin/python",
       "args": [
         "-u",
