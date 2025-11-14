@@ -12,7 +12,7 @@ bedrock = session.client(
     region_name="us-west-2"
 ) 
 
-def get_image_response(prompt_content, bedrock_model_id = "stability.stable-image-ultra-v1:0"):
+def get_image_response(prompt_content, bedrock_model_id = "stability.stable-image-ultra-v1:1"):
     """
     Generate an image from text using the Bedrock Stable Diffusion model
 

@@ -140,9 +140,10 @@ with st.sidebar:
     # System prompt with better styling
     st.markdown("### 💭 System Prompt")
     system_prompt = st.text_area(
-        "",
-        "Eres un asistente virtual amigable",
-        height=100
+        label="System Prompt",
+        value="Eres un asistente virtual amigable",
+        height=100,
+        label_visibility="collapsed"
     )
 
 # Main chat area

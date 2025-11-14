@@ -11,7 +11,7 @@ package-lock.json
 cdk.out
 
 # Local models. Enable, if too heavy to package
-# build_local_llm
+build_bedrock_mcp/output
 
 # Local testing
 _staging_local_testing

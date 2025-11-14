@@ -1,0 +1,7 @@
+streamlit==1.51.0
+strands-agents==1.15.0
+strands-agents-tools==0.2.14
+boto3==1.40.67
+mcp==1.20.0
+fastmcp==2.13.0.2
+uv==0.9.7

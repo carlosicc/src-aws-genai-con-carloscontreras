@@ -1,33 +1,39 @@
-aws-cdk-lib==2.150.0
-constructs>=10.0.0,<11.0.0
-streamlit==1.39.0,<2.0.0
-boto3>=1.36.16,<1.37.0
+aws-cdk-lib==2.224.0
+constructs>=10.4.3,<11.0.0
+streamlit==1.51.0,<2.0.0
+boto3>=1.40.65,<1.41.0
 bs4==0.0.2
-pandas==2.2.3
+pandas==2.3.3
 
 # Enable for Advanced KB filtering
-pydantic==2.10.3
+pydantic==2.12.3
 
 # Enable for LangChain
-faiss-cpu==1.9.0.post1
-langchain==0.3.11
-langchain-community==0.3.11
-langchain-aws==0.2.9
+faiss-cpu==1.12.0
+langchain==1.0.3
+langchain-community==0.4.1
+langchain-aws==1.0.0
 pypdf==5.1.0
 
 # PDF Extractor, using AWS:
-amazon-textract-textractor==1.8.5
+amazon-textract-textractor==1.9.2
 pdf2image==1.17.0 # For MacOS, this needs poppler; e.g. $ brew install poppler
 
 # Enable for Function Calling notebooks
-awswrangler==3.10.1
-termcolor==2.5.0
+awswrangler==3.14
+termcolor==3.2.0
 
 # requirements for Notebooks 8x for Function Calling:
 loguru==0.7.3
 yfinance==0.2.66
-currencyconverter==0.18.1
+currencyconverter==0.18.12
 
 # MCP (mcp tal vez avance muy rápido, así que sugiero usar la última versión estable y segura/recomendada)
-mcp==1.12.4
+mcp==1.21.1
 aiosqlite==0.21.0
+
+# Agents
+uv==0.9.7
+strands-agents>=1.14.0,<1.16.0
+strands-agents-tools>=0.2.14,<1.0.0
+ddgs==9.7.0
