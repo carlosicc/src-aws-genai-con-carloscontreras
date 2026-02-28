@@ -39,10 +39,10 @@ with st.sidebar:
         index=regions.index(st.session_state['region'])
     )
 
-    # Get all model summaries for the selected region
-    # --> IMPORTANT!! We're limiting to Anthropic models, as some models may not support streaming or System Messages
-    #                 Add your own logic to add more Providers; e.g. Amazon, Meta, AI21, etc.
-    all_model_summaries = get_model_summaries(region=selected_region, provider='Anthropic')
+    # Get all model summaries for the selected region using inference profiles,
+    # which includes the latest models (e.g. Claude Sonnet 4.6, Nova 2 Lite, etc.)
+    # --> Add your own logic to include more Providers; e.g. Meta, AI21, etc.
+    all_model_summaries = get_anthropic_models(selected_region) + get_nova_models(selected_region)
     
     # Provider selection
     providers = get_unique_providers(all_model_summaries)
@@ -60,12 +60,13 @@ with st.sidebar:
         and model['responseStreamingSupported'] == True
     ]
 
-    # Determine default model selection
-    default_model_index = 0
-    for idx, model in enumerate(provider_models):
-        if 'haiku' in model['modelId'].lower():
-            default_model_index = idx
-            break
+    # Determine default model selection: latest Haiku for Anthropic, latest Nova Lite for Amazon
+    if selected_provider == 'Anthropic':
+        default_model_index = get_default_model_index(provider_models, 'haiku')
+    elif selected_provider == 'Amazon':
+        default_model_index = get_default_model_index(provider_models, '-lite')
+    else:
+        default_model_index = 0
 
     # Model selection
     if provider_models:
@@ -100,6 +101,11 @@ with st.sidebar:
         "Eres un asistente virtual amigable"
     )
 
+# Pre-fetch pricing at startup so it's ready before the first message.
+# get_bedrock_pricing() is cached (@st.cache_data), so the API is only
+# called once and subsequent runs return instantly.
+pricing_data = get_bedrock_pricing()
+
 # evaluating st.chat_input and determining if a question has been input
 if question := st.chat_input("Message Claude"):
 
@@ -117,12 +123,13 @@ if question := st.chat_input("Message Claude"):
         message_placeholder = st.empty()
         
         # calling the invoke_llm_with_streaming to generate the answer as a generator object, and using
-        answer = st.write_stream(stream_conversation(bedrock_client=bedrock_client, 
-                                                     question=question, 
-                                                     system_prompt=system_prompt, 
-                                                     input_model_id=selected_model_id, 
-                                                     input_temperature=temperature, 
-                                                     input_top_k=top_k))
+        answer = st.write_stream(stream_conversation(bedrock_client=bedrock_client,
+                                                     question=question,
+                                                     system_prompt=system_prompt,
+                                                     input_model_id=selected_model_id,
+                                                     input_temperature=temperature,
+                                                     input_top_k=top_k,
+                                                     pricing_data=pricing_data))
     
     # appending the final answer to the session state
     st.session_state.messages.append({"role": "assistant",

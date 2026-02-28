@@ -19,6 +19,11 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+# Paths anchored to the script's directory so the app works regardless of cwd
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+DATA_DIR = os.path.join(SCRIPT_DIR, "data_pdf_electronics")
+FAISS_INDEX_DIR = os.path.join(SCRIPT_DIR, "faiss_index_electronics")
+
 # Load the Titan Embeddings using Bedrock client.
 logger.info("Initializing Bedrock client and Titan embeddings...")
 bedrock = boto3.client(service_name='bedrock-runtime')
@@ -29,7 +34,7 @@ logger.info("Bedrock client and embeddings initialized successfully")
 # Load the PDFs from the directory
 def data_ingestion():
     logger.info("Starting data ingestion from PDF directory...")
-    loader = PyPDFDirectoryLoader("data_pdf_electronics")
+    loader = PyPDFDirectoryLoader(DATA_DIR)
     documents = loader.load()
     logger.info(f"Loaded {len(documents)} documents from PDFs")
     
@@ -44,6 +49,8 @@ def data_ingestion():
 
 # Vector Store for Vector Embeddings
 def setup_vector_store(documents):
+    if not documents:
+        raise ValueError(f"No documents found in '{DATA_DIR}'. Make sure PDF files exist in that directory.")
     logger.info(f"Creating FAISS vector store from {len(documents)} documents...")
     # Create a vector store using FAISS from the documents and the embeddings
     vector_store = FAISS.from_documents(
@@ -51,11 +58,11 @@ def setup_vector_store(documents):
         titan_embeddings,
     )
     logger.info("Vector store created successfully")
-    
+
     # Save the vector store locally
     # - See: python.langchain.com/docs/integrations/vectorstores/faiss
-    logger.info("Saving vector store to 'faiss_index_electronics'...")
-    vector_store.save_local("faiss_index_electronics")
+    logger.info(f"Saving vector store to '{FAISS_INDEX_DIR}'...")
+    vector_store.save_local(FAISS_INDEX_DIR)
     logger.info("Vector store saved successfully")
 
 
@@ -140,9 +147,9 @@ def streamlit_ui():
                 st.success("Listo!")
         
         if st.button("Borra Vector Store"):
-            if os.path.exists("faiss_index_electronics"):
+            if os.path.exists(FAISS_INDEX_DIR):
                 logger.info("Deleting vector store directory...")
-                shutil.rmtree("faiss_index_electronics")
+                shutil.rmtree(FAISS_INDEX_DIR)
                 logger.info("Vector store deleted successfully")
                 st.success("Vector store cleared successfully!")
             else:
@@ -150,18 +157,18 @@ def streamlit_ui():
                 st.info("No vector store found to clear.")
 
     if st.button("Generate Response") or user_question:
-        if not os.path.exists("faiss_index_electronics"):
+        if not os.path.exists(FAISS_INDEX_DIR):
             st.error("Please create the vector store first from the sidebar.")
             return
-        
+
         if not user_question:
             st.error("Please enter a question.")
             return
-        
+
         with st.spinner("Processing..."):
             logger.info("=== Starting Query Processing ===")
             logger.info("Loading FAISS vector store from disk...")
-            faiss_index = FAISS.load_local("faiss_index_electronics", embeddings=titan_embeddings,
+            faiss_index = FAISS.load_local(FAISS_INDEX_DIR, embeddings=titan_embeddings,
                                            allow_dangerous_deserialization=True)
             logger.info("Vector store loaded successfully")
             

@@ -6,7 +6,7 @@ from loguru import logger
 
 # %%
 ##############################################################################
-# SQL PROMPTS
+# SQL PROMPTS
 ##############################################################################
 
 SYSTEM_PROMPT_SQL = """
@@ -15,9 +15,9 @@ SYSTEM_PROMPT_SQL = """
 
 BASE_PROMPT_TEMPLATE_SQL = """
     You are an agent expert in building and running ANSI SQL statements, compatible with Amazon Athena or PrestoDB.
-    Reply on the following questions, by only returning the SQL statement and nothing else: 
+    Reply on the following questions, by only returning the SQL statement and nothing else:
     <questions>{questions}</questions>.
-    <instructions> Instructions for answer: 
+    <instructions> Instructions for answer:
     The rules to create the SQL statements are:
         1.  Avoid fetching all rows. If user does not specify any aggregation, fetch all columns but use a LIMIT 10 to bring only 10 rows.
         1.1 Use standard SQL ANSI aggregations (e.g. Count(*), Group by). Do not use non-standard or non-ANSI SQL functions or syntax (e.g. RAND()), different than these: 'SELECT', 'FROM', 'WHERE', 'AND', 'IN', 'LIMIT'.
@@ -29,10 +29,10 @@ BASE_PROMPT_TEMPLATE_SQL = """
             <column_name>money</column_name><column_type>DOUBLE</column_type>
             <column_name>coffee_name</column_name><column_type>STRING</column_type>
         3.  Do not create your own VALUES for the Filters below, at the WHERE clause. Instead, only use the following values:
-        3.1 For column "cash_type", use values only the following values, separated by XML tags: 
+        3.1 For column "cash_type", use values only the following values, separated by XML tags:
             <cash_type>cash</cash_type>
             <cash_type>card</cash_type>
-        3.2 For column "coffee_name", use only the following values, separated by XML tags: 
+        3.2 For column "coffee_name", use only the following values, separated by XML tags:
             <coffee_name>Espresso</coffee_name>
             <coffee_name>Cortado</coffee_name>
             <coffee_name>Latte</coffee_name>
@@ -44,23 +44,23 @@ BASE_PROMPT_TEMPLATE_SQL = """
         3.4 For column 'date' you should use the following format: e.g. DATE('2024-12-23'), or use AWS Athena or MySQL date_parse functions. For example:
         <question>What is the total amount of money spent in the coffee shop between March 1st and March 4th, 2024?</question>
         <sql>
-        select sum(money) 
-        from coffee_shop_sales 
+        select sum(money)
+        from coffee_shop_sales
         where "date" between DATE('2024-03-01') and DATE('2024-03-04');
         </sql>
-        
+
         Or a different example:
-        
+
         <question>What is the total amount of money spent in the coffee shop between March 1st and March 31st, 2024, grouped by day and cash type?</question>
         <sql>
         SELECT "date" as "operation_day", cash_type, ROUND(SUM(money),2) as "sales_amount"
-        FROM coffee_shop_sales 
+        FROM coffee_shop_sales
         WHERE "date" BETWEEN DATE('2024-03-01') and DATE('2024-03-31')
         GROUP BY "date",cash_type
         ORDER BY 1,2;
         </sql>
         4. You will return nothing but the SQL statement only, ready to execute.
-    </instructions> 
+    </instructions>
     Assistant:
     """
 
@@ -71,29 +71,29 @@ BASE_PROMPT_TEMPLATE_WITH_TOOLS_SQL = """
     2. ALWAYS use the run_query tool to execute the query
     3. Never return the SQL query directly in your response
 
-    Reply on the following questions: 
+    Reply on the following questions:
     <questions>{questions}</questions>.
-    <instructions> Instructions for answer: 
+    <instructions> Instructions for answer:
     1. You should use the following tools to complete the user request:
-    </instructions> 
+    </instructions>
     <tools_use_instructions>
     {tools_instructions}
     </tools_use_instructions>
     """
 
 
-# Specify here what you need the LLM to call:
+# Specify here what you need the LLM to call:
 tools_instructions = """
     You must use the following tool to execute your SQL query:
     - run_query: This function executes the SQL query and returns the results
     Input: {"sql_query": "your SQL query here"}
-    
+
     Never return the SQL query directly - always use the run_query tool to execute it.
     """
 
 # %%
 ##############################################################################
-# SQL Function Arguments for Function Calling feature
+# SQL Function Arguments for Function Calling feature
 ##############################################################################
 
 # Configure names
@@ -128,10 +128,10 @@ toolConfig = {
 
 # %%
 ##############################################################################
-# Adding Functions for TOOL Calling using SQL against Athena
+# Adding Functions for TOOL Calling using SQL against Athena
 ##############################################################################
 
-def run_query(query: str, 
+def run_query(query: str,
               db_name: str = "db_coffee_shop_sales") -> None:
     """
     Generic function to run athena query and ensures it is successfully completed
@@ -142,7 +142,7 @@ def run_query(query: str,
         formatted string containing athena sql query
     results : str
         query output path
-    
+
     Returns pandas dataframe
     """
 
@@ -154,7 +154,7 @@ def run_query(query: str,
     response = wr.athena.read_sql_query(query,
                                         database=db_name,
                                         ctas_approach=False)
-    
+
     return response
 
 
@@ -170,11 +170,11 @@ def process_tool_call(tool_name, tool_input):
         _type_: _description_
     """
     if tool_name == "run_query":
-        # Pending to filter here for Lambda arguments
+        # Pending to filter here for Lambda arguments
         print("calling run_query tool")
-        
+
         return str(run_query(tool_input['sql_query']))
-    
+
     else:
         logger.error(f"Tool {tool_name} not implemented")
         return None
@@ -277,24 +277,26 @@ def append_tool_result(user_query, message, tool_use, tool_result):
 def chat_with_claude_nl_to_sql(messages,
                                toolConfig=toolConfig,
                                system_prompts=[{"text": BASE_PROMPT_TEMPLATE_SQL}],
-                               model_id = "anthropic.claude-3-5-haiku-20241022-v1:0"):
+                               model_id="anthropic.claude-3-5-haiku-20241022-v1:0",
+                               region_name="us-west-2"):
     """_summary_
 
     Args:
         messages (_type_): _description_
         toolConfig (_type_): _description_
         system_prompts (list, optional): _description_. Defaults to [{"text": BASE_PROMPT_TEMPLATE_SQL}].
+        region_name (str): AWS region name. Defaults to 'us-west-2'.
 
     Returns:
         _type_: _description_
     """
     # Bedrock settings
-    bedrock_client = boto3.client(service_name='bedrock-runtime')
-    
-    # Get user question
+    bedrock_client = boto3.client(service_name='bedrock-runtime', region_name=region_name)
+
+    # Get user question
     user_query = messages[0]['content'][0]['text']
     print(f"\n{'='*50}\nUser Message: {user_query}\n{'='*50}")
-    
+
     # Send the message.
     converse_response = generate_conversation(bedrock_client, model_id, system_prompts, messages, toolConfig)
 
@@ -304,57 +306,59 @@ def chat_with_claude_nl_to_sql(messages,
     print(f"Input tokens: {token_usage['inputTokens']}")
     print(f"Output tokens: {token_usage['outputTokens']}")
     print(f"Total tokens: {token_usage['totalTokens']}")
-    
+
     message = converse_response['output']['message']
-    
+
+    # Safely extract first text block (Claude 4.x may return toolUse as first block)
+    first_text = next((block['text'] for block in message['content'] if 'text' in block), '(no text)')
     print(f"\n{'='*50}\nStep by step thinking:\n{'='*50}")
     print(f"\nInitial Response:")
     print(f"Stop Reason: {converse_response['stopReason']}")
-    print(f"Content: {message['content'][0]['text']}")
-    
+    print(f"Content: {first_text}")
+
     if converse_response['stopReason'] == "tool_use":
         using_tool  = True
     else:
         using_tool  = False
-        
+
     while using_tool:
         if converse_response['stopReason'] == "tool_use":
             tool_use = next(block['toolUse'] for block in message['content'] if block.get('toolUse'))
             tool_name = tool_use["name"]
             tool_input = tool_use["input"]
-    
-            # print(f"\nTool Used: {tool_name}")
-            # print(f"Tool Input: {tool_input}")
-    
+
+            # print(f"\nTool Used: {tool_name}")
+            # print(f"Tool Input: {tool_input}")
+
             tool_result = process_tool_call(tool_name, tool_input)
 
             print(f"\n{'='*50}\nTool Result(SQL output):\n{'='*50}")
             print(tool_result)
             print("="*50)
-    
+
             messages = append_tool_result(user_query, message, tool_use, tool_result)
             converse_response = generate_conversation(bedrock_client, model_id, system_prompts, messages, toolConfig)
 
             # Log token usage.
             token_usage = converse_response['usage']
-            
+
             print(f"\n{'='*50}\nTokens usage:\n{'='*50}")
             print(f"Input tokens: {token_usage['inputTokens']}")
             print(f"Output tokens: {token_usage['outputTokens']}")
             print(f"Total tokens: {token_usage['totalTokens']}")
             print(f"\n{'='*50}\n")
-    
+
             message = converse_response['output']['message']
         else:
             response = message
-            
+
         for block in message['content']:
             if block.get('toolUse'):
                 using_tool = True
                 break
             else:
                 using_tool = False
-    
+
     final_response = next(
         (block['text'] for block in message['content'] if block.get('text')),
         None,
@@ -396,15 +400,15 @@ def build_llm_query(questions, tools_instructions=None, examples=None):
 def format_pretty_output(text, width=70):
     # Split into paragraphs (preserve empty lines)
     paragraphs = text.split('\n\n')
-    
+
     # Wrap each paragraph
     wrapped_paragraphs = []
     for paragraph in paragraphs:
         # Wrap the text while preserving sentence breaks
-        wrapped = textwrap.fill(paragraph, width=width, 
-                              break_long_words=False, 
+        wrapped = textwrap.fill(paragraph, width=width,
+                              break_long_words=False,
                               break_on_hyphens=False)
         wrapped_paragraphs.append(wrapped)
-    
+
     # Join paragraphs with double newlines
     return '\n\n'.join(wrapped_paragraphs)

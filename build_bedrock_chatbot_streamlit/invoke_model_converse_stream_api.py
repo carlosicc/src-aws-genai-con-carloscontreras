@@ -6,7 +6,7 @@ import json
 import os
 
 
-def stream_conversation(bedrock_client, question, system_prompt, input_model_id, input_temperature, input_top_k, messages=[], pricing_list='bedrock_pricing.json'):
+def stream_conversation(bedrock_client, question, system_prompt, input_model_id, input_temperature, input_top_k, messages=[], pricing_data=None):
     """
     Sends messages to a model and streams back the response.
     Args:
@@ -20,28 +20,31 @@ def stream_conversation(bedrock_client, question, system_prompt, input_model_id,
     # Set the temperature for the model inference, controlling the randomness of the responses.
     inference_config = {"temperature": input_temperature}
     
-    # Set the top_k parameter for the model inference, determining how many of the top predictions to consider.
-    additional_model_fields = {"top_k": input_top_k}
-    
     # Define the system prompts to guide the model's behavior, and set the general direction of the models role.
     system_prompts = [{"text": system_prompt}]
-    
+
     # Format the user's message as a dictionary with role and content
     message = {
         "role": "user",
         "content": [{"text": question}]
     }
-    
+
     # Append the formatted user message to the list of messages.
     messages.append(message)
 
-    response = bedrock_client.converse_stream(
+    # Build the API call arguments
+    # Note: Amazon Nova models do not accept additionalModelRequestFields via the Converse API.
+    #       top_k is only passed for Anthropic models (as "top_k" in additionalModelRequestFields).
+    call_kwargs = dict(
         modelId=input_model_id,
         messages=messages,
         system=system_prompts,
         inferenceConfig=inference_config,
-        additionalModelRequestFields=additional_model_fields
     )
+    if 'amazon.' not in input_model_id:
+        call_kwargs['additionalModelRequestFields'] = {"top_k": input_top_k}
+
+    response = bedrock_client.converse_stream(**call_kwargs)
 
     stream = response.get('stream')
     
@@ -84,27 +87,25 @@ def stream_conversation(bedrock_client, question, system_prompt, input_model_id,
                     print(f"Input tokens: {metadata['usage']['inputTokens']}")
                     print(f"Output tokens: {metadata['usage']['outputTokens']}")
 
-                    # Fetch pricing info
-                    pricing_dir = os.path.dirname(os.path.abspath(__file__))
-                    pricing_list = os.path.join(pricing_dir, 'bedrock_pricing.json')
-                    
-                    with open(pricing_list,'r', encoding='utf-8') as f:
-                        pricing_file = json.load(f)
+                    pricing_file = pricing_data or {}
 
-                    # Find matching model in pricing file
+                    # Strip cross-region inference profile prefix (e.g. "us.", "eu.", "ap.", "global.")
+                    # so that pricing keys like "amazon.nova-micro-v1" match IDs like "us.amazon.nova-micro-v1:0"
+                    import re
+                    pricing_model_id = re.sub(r'^(us|eu|ap|global)\.', '', input_model_id)
+
+                    # Find the most specific (longest) matching prefix.
+                    # Longest-match avoids e.g. 'claude-opus-4' swallowing 'claude-opus-4-5'.
                     matching_model = None
                     for price_model_id in pricing_file.keys():
-                        if input_model_id.startswith(price_model_id):
-                            matching_model = price_model_id
-                            break
+                        if pricing_model_id.startswith(price_model_id):
+                            if matching_model is None or len(price_model_id) > len(matching_model):
+                                matching_model = price_model_id
 
                     if matching_model:
                         # Estimate cost of call
                         print(f"Model: {input_model_id}, at temperature {input_temperature} and Top-K of {input_top_k}")
-                        print("""
-                              \nImportant: confirm pricing is up-to-date at https://aws.amazon.com/bedrock/pricing/)
-                                and update bedrock_pricing.json accordingly.
-                              """)
+                        print(f"Note: prices shown are US East (N. Virginia) on-demand — https://aws.amazon.com/bedrock/pricing/")
                         print(f"Price per 1,000 input tokens: {pricing_file[matching_model]['input']*1000:.5f}")
                         print(f"Price per 1,000 output tokens: {pricing_file[matching_model]['output']*1000:.5f}")
                         cost_input_tokens = float(metadata['usage']['inputTokens']) * pricing_file[matching_model]['input']
@@ -114,7 +115,7 @@ def stream_conversation(bedrock_client, question, system_prompt, input_model_id,
                         # Print estimated cost
                         print(f"\nTotal tokens in session: {metadata['usage']['totalTokens']}. Estimated cost: ${total_cost:.10f}")
                     else:
-                        print(f"\nWarning: Model '{input_model_id}' is not included in the pricing file. Please update bedrock_pricing.json with current pricing information.")
+                        print(f"\nWarning: Pricing not available for '{input_model_id}'. It may not yet be indexed in the AWS Pricing API.")
                         print(f"Total tokens in session: {metadata['usage']['totalTokens']}. Cost estimation not available.")
 
                 if 'metrics' in event['metadata']:
